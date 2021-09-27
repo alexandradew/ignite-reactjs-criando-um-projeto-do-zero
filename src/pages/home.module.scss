@@ -1,1 +1,39 @@
-// TODO
+.container {
+  max-width: 1120px;
+  margin: auto;
+  padding: 2rem 0px;
+
+  .loadMore {
+    color: var(--pink);
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .postBox {
+    cursor: pointer;
+    margin: 2rem 0;
+
+    h2 {
+      color: var(--heading);
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    p {
+      color: var(--body);
+      font-size: 18px;
+      margin-top: 0.5rem;
+    }
+
+    span {
+      margin-top: 1rem;
+      font-size: 14px;
+      color: var(--info);
+    }
+
+    div {
+      display: flex;
+      gap: 1rem;
+    }
+  }
+}
