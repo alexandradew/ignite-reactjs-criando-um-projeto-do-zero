@@ -15,8 +15,6 @@ import ptBR from 'date-fns/locale/pt-BR';
 
 import Link from 'next/link'
 
-
-
 interface Post {
   uid?: string;
   first_publication_date: string | null;
@@ -37,23 +35,53 @@ interface HomeProps {
 }
 
 export default function Home( props: HomeProps ) { 
-  const [pageSize, setPageSize] = useState<number>(2)
+  const [posts, setPosts] = useState<Post[]>(props.postsPagination.results)
+  const [nextPage, setNextPage] = useState<string>(props.postsPagination.next_page)
 
-  function getMorePosts(){
-    setPageSize(pageSize + 2)
+  async function getMorePosts(){
+    const newPage = await fetch(nextPage)
+    .then(res => res.json())
+    
+    setNextPage(newPage.next_page)
+
+    const newPosts = [...posts]
+
+    newPage.results.map(post => {
+      newPosts.push({
+        uid: post.uid,
+          first_publication_date: post.first_publication_date,
+          data: {
+            title: post.data.title,
+            subtitle: post.data.subtitle,
+            author: post.data.author,
+          },
+      })
+    })
+
+    setPosts(newPosts)
+    
   }
+
   return(
-    <div className={styles.container}>
+    <div className={commonStyles.container}>
+      <head>
+        <title>Spacetravelling | Home</title>
+      </head>
       <Header />
       <main>
-        { props.postsPagination.results.map(post => {
+        { posts.map(post => {
           return (
-            <Link href={`/post/${post.uid}`}>
+            <Link href={`/post/${post.uid}`} key={post.uid}>
               <div className={styles.postBox}>
                 <h2>{post.data.title}</h2>
                 <p>{post.data.subtitle}</p>
                 <div>
-                  <span><FiCalendar/> {post.first_publication_date}</span>
+                  <span>
+                  <FiCalendar/> 
+                     <time>
+                      {format(new Date(post.first_publication_date), "d MMM yyyy", {locale: ptBR })}  
+                     </time>
+                  </span>
                   <span><FiUser/> {post.data.author}</span>
                 </div>
               </div>
@@ -61,7 +89,7 @@ export default function Home( props: HomeProps ) {
           )
         })}
       </main>
-      {props.postsPagination.next_page && <span onClick={() => getMorePosts()}className={styles.loadMore}>Carregar mais posts</span>}
+      {nextPage && <span onClick={getMorePosts} className={styles.loadMore}>Carregar mais posts</span>}
     </div>
   )
 }
@@ -71,33 +99,30 @@ export const getStaticProps: GetStaticProps = async () => {
 
   const postsResponse = await prismic.query([
     Prismic.predicates.at('document.type', 'post')
-  ], {
-    fetch: ['post.title', 'post.subtitle', 'post.author'],
-    pageSize: 2,
-  })
+  ], { pageSize: 1 })
 
-  const postsPagination = []
 
-  postsResponse.results.map(post => {
-    postsPagination.push({
+  const posts = postsResponse.results.map(post => {
+    return{
       uid: post.uid,
-      first_publication_date:
-      format(new Date(post.first_publication_date), "d MMM yyyy", {locale: ptBR }).toLocaleUpperCase(),
+      first_publication_date: post.first_publication_date,
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,
         author: post.data.author,
       }
-    })
+    }
   })
+
+  const postsPagination = {
+    next_page: postsResponse.next_page,
+    results: posts
+  }
 
   return {
     props: { 
-      postsPagination: {
-        next_page: postsResponse.next_page,
-        results: postsPagination
-      }
-     }
+      postsPagination 
+    },
   }
 
 };

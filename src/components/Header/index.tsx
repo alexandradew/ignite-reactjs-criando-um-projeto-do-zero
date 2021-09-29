@@ -1,4 +1,5 @@
 import styles from './header.module.scss';
+import Link from 'next/link'
 
 function LogoIcon() {
   return <img src="/logo.svg" alt="logo" />
@@ -6,8 +7,10 @@ function LogoIcon() {
 
 export default function Header() {
   return (
-    <div className={styles.header}>
-      <LogoIcon />
-    </div>
+    <Link href='/'>
+      <div className={styles.header}>
+        <LogoIcon />
+      </div>    
+    </Link>
    )
 }

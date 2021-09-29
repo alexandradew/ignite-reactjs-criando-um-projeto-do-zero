@@ -4,4 +4,8 @@
   color: var(--heading);
   display: flex;
   align-items: center;
+
+  img {
+    cursor: pointer;
+  }
 }
